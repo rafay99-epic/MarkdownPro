@@ -7,23 +7,24 @@
 
 @layer base {
   :root {
-    --background: 220 13% 18%;
-    --foreground: 224 71% 4%;
+    /* Light mode - Tokyo Night Light */
+    --background: 213 27% 84%;
+    --foreground: 223 71% 8%;
 
-    --card: 220 13% 18%;
-    --card-foreground: 224 71% 4%;
+    --card: 213 27% 84%;
+    --card-foreground: 223 71% 8%;
 
-    --popover: 220 13% 18%;
-    --popover-foreground: 224 71% 4%;
+    --popover: 213 27% 84%;
+    --popover-foreground: 223 71% 8%;
 
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 215 25% 27%;
-    --secondary-foreground: 226 64% 88%;
+    --secondary: 200 7% 90%;
+    --secondary-foreground: 223 71% 8%;
 
-    --muted: 215 25% 27%;
-    --muted-foreground: 226 64% 88%;
+    --muted: 200 7% 90%;
+    --muted-foreground: 223 71% 8%;
 
     --accent: 217 91% 60%;
     --accent-foreground: 0 0% 98%;
@@ -31,23 +32,24 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 215 25% 27%;
-    --input: 215 25% 27%;
+    --border: 200 7% 90%;
+    --input: 200 7% 90%;
     --ring: 217 91% 60%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 220 13% 18%;
-    --sidebar-foreground: 226 64% 88%;
+    --sidebar-background: 213 27% 84%;
+    --sidebar-foreground: 223 71% 8%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 215 25% 27%;
-    --sidebar-accent-foreground: 226 64% 88%;
-    --sidebar-border: 215 25% 27%;
+    --sidebar-accent: 200 7% 90%;
+    --sidebar-accent-foreground: 223 71% 8%;
+    --sidebar-border: 200 7% 90%;
     --sidebar-ring: 217 91% 60%;
   }
 
   .dark {
+    /* Dark mode - Tokyo Night */
     --background: 223 71% 8%;
     --foreground: 226 64% 88%;
 

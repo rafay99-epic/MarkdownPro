@@ -79,22 +79,58 @@ export const downloadAsPdf = async (htmlContent: string, fileName: string): Prom
   tempDiv.style.cssText = `
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     line-height: 1.6;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
+    max-width: 210mm;
+    margin: 0;
+    padding: 20mm;
     color: #333;
     background: white;
     position: absolute;
     left: -9999px;
     top: 0;
+    box-sizing: border-box;
   `;
+  
+  // Style headings and other elements for better PDF appearance
+  const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  headings.forEach(heading => {
+    (heading as HTMLElement).style.cssText += `
+      color: #1f2937;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      page-break-after: avoid;
+    `;
+  });
+
+  const codeBlocks = tempDiv.querySelectorAll('code, pre');
+  codeBlocks.forEach(code => {
+    (code as HTMLElement).style.cssText += `
+      background-color: #f8f9fa;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+      font-size: 0.875rem;
+    `;
+  });
+
+  const paragraphs = tempDiv.querySelectorAll('p');
+  paragraphs.forEach(p => {
+    (p as HTMLElement).style.cssText += `
+      margin-bottom: 1rem;
+      orphans: 3;
+      widows: 3;
+    `;
+  });
   
   document.body.appendChild(tempDiv);
 
   const canvas = await html2canvas(tempDiv, {
     scale: 2,
     useCORS: true,
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
+    width: tempDiv.scrollWidth,
+    height: tempDiv.scrollHeight,
+    scrollX: 0,
+    scrollY: 0
   });
 
   document.body.removeChild(tempDiv);
@@ -106,10 +142,47 @@ export const downloadAsPdf = async (htmlContent: string, fileName: string): Prom
   const pdfHeight = pdf.internal.pageSize.getHeight();
   const imgWidth = canvas.width;
   const imgHeight = canvas.height;
-  const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-  const imgX = (pdfWidth - imgWidth * ratio) / 2;
-  const imgY = 0;
-
-  pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+  
+  // Calculate scale to fit width and maintain aspect ratio
+  const scale = pdfWidth / imgWidth;
+  const scaledHeight = imgHeight * scale;
+  
+  let yPosition = 0;
+  
+  // If content fits on one page
+  if (scaledHeight <= pdfHeight) {
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, scaledHeight);
+  } else {
+    // Split content across multiple pages
+    const pageHeight = pdfHeight;
+    const pagesNeeded = Math.ceil(scaledHeight / pageHeight);
+    
+    for (let i = 0; i < pagesNeeded; i++) {
+      if (i > 0) {
+        pdf.addPage();
+      }
+      
+      const sourceY = (i * pageHeight) / scale;
+      const sourceHeight = Math.min(pageHeight / scale, imgHeight - sourceY);
+      
+      // Create a canvas for this page
+      const pageCanvas = document.createElement('canvas');
+      const pageCtx = pageCanvas.getContext('2d')!;
+      pageCanvas.width = imgWidth;
+      pageCanvas.height = sourceHeight * 2; // scale factor
+      
+      pageCtx.drawImage(
+        canvas,
+        0, sourceY * 2, // source x, y (scaled)
+        imgWidth, sourceHeight * 2, // source width, height (scaled)
+        0, 0, // dest x, y
+        imgWidth, sourceHeight * 2 // dest width, height
+      );
+      
+      const pageImgData = pageCanvas.toDataURL('image/png');
+      pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, sourceHeight * scale);
+    }
+  }
+  
   pdf.save(`${fileName || 'converted'}.pdf`);
 };

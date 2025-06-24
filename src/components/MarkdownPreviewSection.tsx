@@ -15,27 +15,27 @@ const MarkdownPreviewSection = ({
   if (!markdownContent) return null;
 
   return (
-    <Card className="mt-8 shadow-lg bg-tokyo-bgHighlight border-tokyo-input">
+    <Card className="mt-8 shadow-lg bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-tokyo-fg">Preview</CardTitle>
-        <CardDescription className="text-tokyo-fgDark">
+        <CardTitle className="text-card-foreground">Preview</CardTitle>
+        <CardDescription className="text-muted-foreground">
           Preview your converted content before downloading
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="markdown" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-tokyo-input">
-            <TabsTrigger value="markdown" className="text-tokyo-fg data-[state=active]:bg-tokyo-blue data-[state=active]:text-white">Markdown Source</TabsTrigger>
-            <TabsTrigger value="html" className="text-tokyo-fg data-[state=active]:bg-tokyo-blue data-[state=active]:text-white">HTML Preview</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-muted">
+            <TabsTrigger value="markdown" className="text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Markdown Source</TabsTrigger>
+            <TabsTrigger value="html" className="text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">HTML Preview</TabsTrigger>
           </TabsList>
           <TabsContent value="markdown" className="mt-4">
-            <pre className="bg-tokyo-terminal p-4 rounded-lg overflow-auto max-h-96 text-sm text-tokyo-fg border border-tokyo-input">
+            <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-96 text-sm text-foreground border border-border">
               {markdownContent}
             </pre>
           </TabsContent>
           <TabsContent value="html" className="mt-4">
             <div
-              className="prose max-w-none bg-tokyo-bg p-6 rounded-lg border border-tokyo-input max-h-96 overflow-auto text-tokyo-fg prose-headings:text-tokyo-blue prose-code:text-tokyo-cyan prose-pre:bg-tokyo-terminal prose-blockquote:border-tokyo-blue"
+              className="prose max-w-none bg-background p-6 rounded-lg border border-border max-h-96 overflow-auto text-foreground prose-headings:text-primary prose-code:text-accent-foreground prose-pre:bg-muted prose-blockquote:border-primary"
               dangerouslySetInnerHTML={{ __html: htmlContent }}
             />
           </TabsContent>

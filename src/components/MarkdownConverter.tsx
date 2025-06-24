@@ -12,14 +12,14 @@ const MarkdownConverter = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-tokyo-bg via-tokyo-bgHighlight to-tokyo-terminal p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-secondary p-4">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-start mb-8">
           <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold text-tokyo-fg mb-4">
+            <h1 className="text-4xl font-bold text-foreground mb-4">
               Markdown Converter
             </h1>
-            <p className="text-xl text-tokyo-fgDark max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Transform your markdown files into beautiful HTML pages or PDF documents with just a few clicks
             </p>
           </div>
