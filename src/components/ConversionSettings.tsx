@@ -26,7 +26,13 @@ import {
 } from "lucide-react";
 
 export interface ConversionOptions {
-  theme: "github" | "vscode-dark" | "medium" | "academic" | "minimal";
+  theme:
+    | "github"
+    | "vscode-dark"
+    | "medium"
+    | "academic"
+    | "minimal"
+    | "tokyo-night";
   fontSize: "small" | "medium" | "large";
   fontFamily: "system" | "serif" | "mono";
   lineHeight: "compact" | "normal" | "relaxed";
@@ -74,6 +80,11 @@ const ConversionSettings: React.FC<ConversionSettingsProps> = ({
       description: "Formal document style",
     },
     { value: "minimal", label: "Minimal", description: "Ultra-clean design" },
+    {
+      value: "tokyo-night",
+      label: "Tokyo Night",
+      description: "Modern dark theme with vibrant colors",
+    },
   ];
 
   const fontSizes = [

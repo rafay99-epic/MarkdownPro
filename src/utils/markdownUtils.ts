@@ -158,6 +158,8 @@ const getThemeStyles = (options: ConversionOptions): string => {
       return baseStyles + getAcademicTheme(options.darkMode);
     case "minimal":
       return baseStyles + getMinimalTheme(options.darkMode);
+    case "tokyo-night":
+      return baseStyles + getTokyoNightTheme();
     default:
       return baseStyles + getGitHubTheme(options.darkMode);
   }
@@ -691,6 +693,135 @@ const getMinimalTheme = (darkMode: boolean): string => {
       }
     `;
   }
+};
+
+const getTokyoNightTheme = (): string => {
+  return `
+    body {
+      color: #a9b1d6;
+      background-color: #1a1b26;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: #7aa2f7;
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      border-bottom: 2px solid #292e42;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.875rem;
+      border-bottom: 1px solid #292e42;
+      padding-bottom: 0.375rem;
+      margin: 2rem 0 1rem;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      margin: 1.5rem 0 0.75rem;
+    }
+
+    h4 {
+      font-size: 1.25rem;
+      color: #bb9af7;
+    }
+
+    a {
+      color: #7dcfff;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      color: #2ac3de;
+      text-decoration: underline;
+    }
+
+    code {
+      background-color: #1f2335;
+      color: #9aa5ce;
+      padding: 0.2em 0.4em;
+      border-radius: 0.375rem;
+      font-size: 0.875em;
+    }
+
+    pre {
+      background-color: #1f2335;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      border: 1px solid #292e42;
+    }
+
+    pre code {
+      background-color: transparent;
+      padding: 0;
+      color: #9aa5ce;
+    }
+
+    blockquote {
+      border-left: 4px solid #7aa2f7;
+      margin: 1rem 0;
+      padding: 0.5rem 0 0.5rem 1rem;
+      background-color: #1f2335;
+      color: #9aa5ce;
+    }
+
+    table {
+      border: 1px solid #292e42;
+    }
+
+    th {
+      background-color: #1f2335;
+      color: #7aa2f7;
+      border-bottom: 2px solid #292e42;
+    }
+
+    td {
+      border-bottom: 1px solid #292e42;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1f2335;
+    }
+
+    tr:hover {
+      background-color: #292e42;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #7aa2f7, transparent);
+      margin: 2rem 0;
+    }
+
+    ul, ol {
+      color: #a9b1d6;
+    }
+
+    strong {
+      color: #c0caf5;
+    }
+
+    em {
+      color: #bb9af7;
+    }
+
+    img {
+      border: 1px solid #292e42;
+    }
+
+    .mermaid-container {
+      background-color: #1f2335;
+      border-color: #292e42;
+    }
+  `;
 };
 
 const generateTableOfContents = (html: string): string => {
