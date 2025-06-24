@@ -1,73 +1,153 @@
-# Welcome to your Lovable project
+# 📝 Markdown Pro
 
-## Project info
+A stunning, modern Markdown editor and converter built with React, TypeScript, and Tailwind CSS. Transform your markdown writing experience with a beautiful UI, real-time preview, and multiple export options.
 
-**URL**: https://lovable.dev/projects/7e3c89d6-260a-421b-8b5c-5d40a8e80478
+![Markdown Pro Banner](./public/markdownPro.png)
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+- 🎨 **Beautiful UI/UX** - Modern, clean interface with smooth animations
+- 🌓 **Multiple Themes** - Choose from a variety of carefully crafted themes
+- 📱 **Responsive Design** - Works perfectly on desktop and mobile devices
+- ⚡ **Real-time Preview** - See your markdown rendered instantly
+- 💾 **Local Storage** - Auto-saves your work
+- 📤 **Export Options** - Download as MD, HTML, or PDF
+- 📁 **File Management** - Organize and manage multiple markdown files
+- 🔍 **Search & Replace** - Quickly find and replace text
+- 🎯 **Focus Mode** - Distraction-free writing experience
+- 🔄 **Version History** - Track changes to your documents
 
-**Use Lovable**
+## 🚀 Quick Start
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/7e3c89d6-260a-421b-8b5c-5d40a8e80478) and start prompting.
+### Prerequisites
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js 18+ (LTS recommended)
+- npm or yarn or pnpm
 
-**Use your preferred IDE**
+### Installation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Clone the repository:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+git clone https://github.com/rafay99-epic/MarkdownPro.git
+cd MarkdownPro
 ```
 
-**Edit a file directly in GitHub**
+2. Install dependencies:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
 
-**Use GitHub Codespaces**
+3. Start the development server:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-## What technologies are used for this project?
+4. Open [http://localhost:4321](http://localhost:4321) in your browser.
 
-This project is built with:
+## 🛠️ Tech Stack
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Frontend Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **State Management**: React Query
+- **Markdown Processing**: Marked
+- **Routing**: React Router
+- **Build Tool**: Vite
+- **Animations**: Framer Motion
+- **Theme Management**: next-themes
 
-## How can I deploy this project?
+## 📦 Project Structure
 
-Simply open [Lovable](https://lovable.dev/projects/7e3c89d6-260a-421b-8b5c-5d40a8e80478) and click on Share -> Publish.
+```
+markdown-page-smith/
+├── src/
+│   ├── components/     # React components
+│   ├── pages/         # Page components
+│   ├── hooks/         # Custom React hooks
+│   ├── lib/           # Utilities and configurations
+│   ├── utils/         # Helper functions
+│   └── App.tsx        # Main application component
+├── public/            # Static assets
+└── package.json       # Project dependencies
+```
 
-## Can I connect a custom domain to my Lovable project?
+## 🎨 Themes
 
-Yes, you can!
+The application comes with multiple built-in themes:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Light/Dark mode
+- System preference detection
+- Custom theme support
+- Material Design inspired transitions
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 💻 Usage
+
+1. **Creating a New Document**
+
+   - Click the "New" button
+   - Start writing in markdown
+   - Your work is automatically saved
+
+2. **Converting Markdown**
+
+   - Write or paste your markdown
+   - See real-time preview
+   - Export to your desired format
+
+3. **Managing Files**
+
+   - Access saved files from the sidebar
+   - Search through your documents
+   - Organize with folders
+
+4. **Customizing Experience**
+   - Choose your preferred theme
+   - Adjust editor settings
+   - Configure export options
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [shadcn/ui](https://ui.shadcn.com/) for the beautiful UI components
+- [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
+- [Marked](https://marked.js.org/) for markdown processing
+- [Framer Motion](https://www.framer.com/motion/) for smooth animations
+
+## 📞 Support
+
+If you have any questions or need help, please:
+
+1. Check the [Issues](https://github.com/rafay99-epic/MarkdownPro/) page
+2. Create a new issue if your problem isn't already listed
+3. Reach out through the project's discussions
+
+---
+
+Made with ❤️ by [Abdul Rafay](https://rafay99.com)
