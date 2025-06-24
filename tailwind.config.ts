@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,26 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Tokyo Night color scheme
+				tokyo: {
+					bg: '#1a1b26',
+					bgHighlight: '#24283b',
+					terminal: '#1d202f',
+					menu: '#16161e',
+					input: '#2c2e44',
+					fg: '#c0caf5',
+					fgDark: '#737aa2',
+					comment: '#565f89',
+					cyan: '#7dcfff',
+					blue: '#7aa2f7',
+					magenta: '#bb9af7',
+					red: '#f7768e',
+					orange: '#ff9e64',
+					yellow: '#e0af68',
+					green: '#9ece6a',
+					teal: '#73daca',
+					purple: '#9d7cd8'
 				}
 			},
 			borderRadius: {
