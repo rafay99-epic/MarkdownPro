@@ -6,8 +6,8 @@ import { TransitionType } from "./index";
 // 90 frames = 1500ms (1.5 seconds)
 // 120 frames = 2000ms (2 seconds)
 export const ANIMATION_CONFIG = {
-  enabled: true, // Toggle animations on/off
-  type: "material" as TransitionType,
+  enabled: false, // Toggle animations on/off
+  type: "none" as TransitionType,
   // Choose your preferred duration:
   duration: 120, // Current: 1.5 seconds (smooth and visible)
   // Other options:

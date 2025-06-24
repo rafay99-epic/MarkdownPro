@@ -9,7 +9,7 @@ import {
 import { ThemeSelector } from "./ThemeSelector";
 import { themeGroups } from "@/lib/theme-config";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThemeTransition } from "./theme-transitions";
+// import { ThemeTransition } from "./theme-transitions";
 
 export function ThemeToggle() {
   const { theme } = useTheme();
@@ -23,7 +23,7 @@ export function ThemeToggle() {
 
   return (
     <>
-      <ThemeTransition />
+      {/* <ThemeTransition /> */}
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon" className="relative">

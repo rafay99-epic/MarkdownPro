@@ -12,7 +12,9 @@ export function MaterialTransition({ duration = 25 }: MaterialTransitionProps) {
   const isAnimatingRef = useRef(false);
   const clickPositionRef = useRef({ x: 0, y: 0 });
   const prevThemeRef = useRef<string | undefined>();
+  const isInitialMount = useRef(true);
 
+  // Track click position
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       clickPositionRef.current = { x: e.clientX, y: e.clientY };
@@ -21,35 +23,33 @@ export function MaterialTransition({ duration = 25 }: MaterialTransitionProps) {
     return () => window.removeEventListener("click", handleClick);
   }, []);
 
+  // Theme change effect
   useEffect(() => {
-    if (isAnimatingRef.current || !theme || theme === prevThemeRef.current)
+    // Skip animation on initial mount and set initial theme
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      prevThemeRef.current = theme;
       return;
+    }
 
-    const getThemeColors = (themeName?: string) => {
-      const selectedTheme = themeGroups
+    // Skip if no theme change or already animating
+    if (!theme || theme === prevThemeRef.current || isAnimatingRef.current) {
+      return;
+    }
+
+    const getThemeColors = () => {
+      const currentTheme = themeGroups
         .flatMap((group) => group.themes)
-        .find((t) => t.value === themeName);
+        .find((t) => t.value === theme);
       return (
-        selectedTheme?.colors || {
+        currentTheme?.colors || {
           background: resolvedTheme === "dark" ? "#000000" : "#ffffff",
           primary: resolvedTheme === "dark" ? "#ffffff" : "#000000",
         }
       );
     };
 
-    // Create a container for the old theme
-    const container = document.createElement("div");
-    container.style.position = "fixed";
-    container.style.top = "0";
-    container.style.left = "0";
-    container.style.width = "100%";
-    container.style.height = "100%";
-    container.style.backgroundColor = getThemeColors(
-      prevThemeRef.current
-    ).background;
-    container.style.zIndex = "9998";
-    document.body.appendChild(container);
-
+    // Create or get canvas
     if (!canvasRef.current) {
       const canvas = document.createElement("canvas");
       canvas.style.position = "fixed";
@@ -66,46 +66,57 @@ export function MaterialTransition({ duration = 25 }: MaterialTransitionProps) {
     const animate = () => {
       isAnimatingRef.current = true;
       const canvas = canvasRef.current!;
-      const ctx = canvas.getContext("2d")!;
+      const ctx = canvas.getContext("2d", { alpha: true })!;
 
+      // Set canvas size to match window
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
 
-      const colors = getThemeColors(theme);
+      const colors = getThemeColors();
 
+      // Use click position or center of screen
       const startX = clickPositionRef.current.x || canvas.width / 2;
       const startY = clickPositionRef.current.y || canvas.height / 2;
 
+      // Calculate max radius to cover screen
       const maxRadius = Math.sqrt(
         Math.pow(Math.max(startX, canvas.width - startX), 2) +
           Math.pow(Math.max(startY, canvas.height - startY), 2)
       );
 
-      let currentRadius = 0;
       let frame = 0;
+      let animationFrame: number;
 
       const render = () => {
         if (frame >= duration) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           isAnimatingRef.current = false;
-          container.remove();
           prevThemeRef.current = theme;
+          cancelAnimationFrame(animationFrame);
           return;
         }
 
         const progress = frame / duration;
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        currentRadius = maxRadius * easeOutQuart;
+        // Material Design easing curve
+        const easing =
+          progress < 0.5
+            ? 4 * progress * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+        const currentRadius = maxRadius * easing;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Draw background circle
+        ctx.save();
         ctx.beginPath();
         ctx.arc(startX, startY, currentRadius, 0, Math.PI * 2);
         ctx.fillStyle = colors.background;
         ctx.fill();
+        ctx.restore();
 
         frame++;
-        requestAnimationFrame(render);
+        animationFrame = requestAnimationFrame(render);
       };
 
       render();
@@ -113,6 +124,7 @@ export function MaterialTransition({ duration = 25 }: MaterialTransitionProps) {
 
     animate();
 
+    // Cleanup
     return () => {
       if (canvasRef.current && document.body.contains(canvasRef.current)) {
         const ctx = canvasRef.current.getContext("2d");

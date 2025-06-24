@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { ThemeTransition } from "@/components/ThemeTransition";
+// import { ThemeTransition } from "@/components/ThemeTransition";
 import Index from "./pages/Index";
 import Converter from "./pages/Converter";
 import Features from "./pages/Features";
@@ -20,7 +20,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <ThemeTransition />
+      {/* <ThemeTransition /> */}
       <TooltipProvider>
         <Toaster />
         <Sonner />
