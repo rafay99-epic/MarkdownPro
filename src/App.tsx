@@ -25,12 +25,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <Analytics
-          mode="production"
-          beforeSend={(event) => {
-            return event;
-          }}
-        />
+        <Analytics />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
