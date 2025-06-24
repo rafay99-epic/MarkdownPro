@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { marked } from 'marked';
 import jsPDF from 'jspdf';
@@ -16,9 +15,9 @@ const MarkdownConverter = () => {
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
 
-  const convertMarkdownToHtml = useCallback((markdown: string) => {
+  const convertMarkdownToHtml = useCallback(async (markdown: string) => {
     try {
-      const html = marked(markdown);
+      const html = await marked(markdown);
       setHtmlContent(html);
       return html;
     } catch (error) {
@@ -42,10 +41,10 @@ const MarkdownConverter = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const content = e.target?.result as string;
       setMarkdownContent(content);
-      convertMarkdownToHtml(content);
+      await convertMarkdownToHtml(content);
       setFileName(file.name.replace('.md', ''));
     };
     reader.readAsText(file);
