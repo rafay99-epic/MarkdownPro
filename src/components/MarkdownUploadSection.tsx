@@ -16,31 +16,22 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  validateMarkdownFile,
-  readFileAsText,
-  convertMarkdownToHtml,
-  saveFileToStorage,
-  StoredMarkdownFile,
-} from "@/utils/markdownUtils";
+import { marked } from "marked";
+import { StorageManager, type MarkdownFile } from "@/utils/storageUtils";
 import { ConversionOptions } from "./ConversionSettings";
 
 interface MarkdownUploadSectionProps {
   fileName: string;
   isDragging: boolean;
-  setMarkdownContent: (content: string) => void;
-  setHtmlContent: (content: string) => void;
   setFileName: (name: string) => void;
   setIsDragging: (dragging: boolean) => void;
   conversionOptions: ConversionOptions;
-  onFileUploaded?: (file: StoredMarkdownFile) => void;
+  onFileUploaded?: (file: MarkdownFile) => void;
 }
 
 const MarkdownUploadSection = ({
   fileName,
   isDragging,
-  setMarkdownContent,
-  setHtmlContent,
   setFileName,
   setIsDragging,
   conversionOptions,
@@ -51,6 +42,20 @@ const MarkdownUploadSection = ({
     "idle" | "success" | "error"
   >("idle");
   const { toast } = useToast();
+
+  const validateMarkdownFile = (file: File): boolean => {
+    const validExtensions = [".md", ".mdx"];
+    return validExtensions.some((ext) => file.name.toLowerCase().endsWith(ext));
+  };
+
+  const readFileAsText = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+  };
 
   const processFile = useCallback(
     async (file: File) => {
@@ -70,29 +75,27 @@ const MarkdownUploadSection = ({
 
       try {
         const content = await readFileAsText(file);
-        const htmlContent = await convertMarkdownToHtml(
-          content,
-          conversionOptions
-        );
-
         const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
 
-        // Save to local storage
-        const storedFile = saveFileToStorage(
-          fileNameWithoutExt,
-          content,
-          htmlContent,
-          file.name
-        );
+        // Save to unified storage system
+        const newFile: MarkdownFile = {
+          id: crypto.randomUUID(),
+          title: fileNameWithoutExt,
+          content: content,
+          type: "uploaded",
+          originalName: file.name,
+          size: file.size,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        StorageManager.saveFile(newFile);
 
         // Update current state
-        setMarkdownContent(content);
-        setHtmlContent(htmlContent);
         setFileName(fileNameWithoutExt);
         setUploadStatus("success");
 
         // Notify parent component
-        onFileUploaded?.(storedFile);
+        onFileUploaded?.(newFile);
 
         toast({
           title: "File uploaded successfully!",
@@ -113,14 +116,7 @@ const MarkdownUploadSection = ({
         setIsProcessing(false);
       }
     },
-    [
-      setMarkdownContent,
-      setHtmlContent,
-      setFileName,
-      conversionOptions,
-      toast,
-      onFileUploaded,
-    ]
+    [setFileName, toast, onFileUploaded]
   );
 
   const handleDragOver = useCallback(

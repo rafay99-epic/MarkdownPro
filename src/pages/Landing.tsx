@@ -16,12 +16,18 @@ import {
   Github,
   Twitter,
   Mail,
+  Menu,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const features = [
     {
@@ -93,6 +99,55 @@ const Landing = () => {
     { number: "100%", label: "Privacy Protected" },
   ];
 
+  const NavLinks = () => (
+    <>
+      <Button
+        variant="ghost"
+        size={isMobile ? "default" : "sm"}
+        onClick={() => {
+          navigate("/features");
+          setIsMenuOpen(false);
+        }}
+        className={isMobile ? "w-full justify-start" : ""}
+      >
+        Features
+      </Button>
+      <Button
+        variant="ghost"
+        size={isMobile ? "default" : "sm"}
+        onClick={() => {
+          navigate("/editor");
+          setIsMenuOpen(false);
+        }}
+        className={isMobile ? "w-full justify-start" : ""}
+      >
+        Editor
+      </Button>
+      <Button
+        variant="ghost"
+        size={isMobile ? "default" : "sm"}
+        onClick={() => {
+          navigate("/privacy");
+          setIsMenuOpen(false);
+        }}
+        className={isMobile ? "w-full justify-start" : ""}
+      >
+        Privacy
+      </Button>
+      <Button
+        variant="ghost"
+        size={isMobile ? "default" : "sm"}
+        onClick={() => {
+          navigate("/about");
+          setIsMenuOpen(false);
+        }}
+        className={isMobile ? "w-full justify-start" : ""}
+      >
+        About
+      </Button>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
       {/* Navigation */}
@@ -111,75 +166,93 @@ const Landing = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/features")}
-            >
-              Features
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/privacy")}
-            >
-              Privacy
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/about")}
-            >
-              About
-            </Button>
-            <ThemeToggle />
-            <Button
-              onClick={() => navigate("/converter")}
-              className="bg-gradient-to-r from-primary to-primary/80"
-            >
-              Try Now <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
+
+          {isMobile ? (
+            <div className="flex items-center space-x-4">
+              <ThemeToggle />
+              <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-[300px] sm:w-[400px]">
+                  <div className="flex flex-col space-y-4 mt-8">
+                    <NavLinks />
+                    <Button
+                      onClick={() => {
+                        navigate("/converter");
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full bg-gradient-to-r from-primary to-primary/80"
+                    >
+                      Try Now <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <NavLinks />
+              <ThemeToggle />
+              <Button
+                onClick={() => navigate("/converter")}
+                className="bg-gradient-to-r from-primary to-primary/80"
+              >
+                Try Now <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
+      <section className="relative py-12 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Badge className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary border-primary/20 mb-8">
+            <Badge className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary border-primary/20 mb-6 lg:mb-8">
               <Sparkles className="h-4 w-4 mr-2" />
               AI-Powered Markdown Conversion
             </Badge>
 
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-foreground mb-8 leading-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-foreground mb-6 lg:mb-8 leading-tight">
               Transform Markdown into
               <span className="block bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
                 Beautiful Documents
               </span>
             </h1>
 
-            <p className="text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto mb-12 leading-relaxed">
+            <p className="text-lg lg:text-2xl text-muted-foreground max-w-4xl mx-auto mb-8 lg:mb-12 leading-relaxed px-4">
               Convert your markdown files into stunning HTML pages and
               professional PDF documents with just a few clicks. No registration
               required, completely free.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 lg:mb-16 px-4">
               <Button
-                size="lg"
+                size={isMobile ? "default" : "lg"}
                 onClick={() => navigate("/converter")}
-                className="h-14 px-8 text-lg bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300"
+                className={`${
+                  isMobile ? "w-full" : "h-14 px-8"
+                } text-lg bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300`}
               >
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button
-                size="lg"
+                size={isMobile ? "default" : "lg"}
                 variant="outline"
-                className="h-14 px-8 text-lg border-2 hover:bg-muted/50"
+                className={`${
+                  isMobile ? "w-full" : "h-14 px-8"
+                } text-lg border-2 hover:bg-muted/50`}
+                onClick={() =>
+                  window.open(
+                    "https://github.com/rafay99-epic/MarkdownPro",
+                    "_blank"
+                  )
+                }
               >
                 <Github className="mr-2 h-5 w-5" />
                 View on GitHub
@@ -187,10 +260,13 @@ const Landing = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8 max-w-4xl mx-auto px-4">
               {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-3xl lg:text-4xl font-bold text-primary mb-2">
+                <div
+                  key={index}
+                  className="text-center p-4 bg-card/50 rounded-lg backdrop-blur-sm"
+                >
+                  <div className="text-2xl lg:text-4xl font-bold text-primary mb-2">
                     {stat.number}
                   </div>
                   <div className="text-sm text-muted-foreground">
@@ -204,37 +280,37 @@ const Landing = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 lg:py-32 bg-muted/30">
+      <section className="py-12 lg:py-32 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 lg:mb-16">
             <Badge className="inline-flex items-center px-4 py-2 bg-secondary/10 text-secondary border-secondary/20 mb-6">
               <Zap className="h-4 w-4 mr-2" />
               Powerful Features
             </Badge>
-            <h2 className="text-3xl lg:text-5xl font-bold text-foreground mb-6">
+            <h2 className="text-2xl lg:text-5xl font-bold text-foreground mb-6">
               Everything you need for
               <span className="block text-primary">perfect documents</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
               From simple notes to complex technical documentation, our platform
               handles it all with precision and style.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {features.map((feature, index) => (
               <Card
                 key={index}
                 className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm"
               >
-                <CardContent className="p-8">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="h-7 w-7 text-primary" />
+                <CardContent className="p-6 lg:p-8">
+                  <div className="w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <feature.icon className="h-6 w-6 lg:h-7 lg:w-7 text-primary" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">
+                  <h3 className="text-lg lg:text-xl font-semibold text-foreground mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
                 </CardContent>
@@ -245,41 +321,41 @@ const Landing = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 lg:py-32">
+      <section className="py-12 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 lg:mb-16">
             <Badge className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary border-primary/20 mb-6">
               <Users className="h-4 w-4 mr-2" />
               Loved by Creators
             </Badge>
-            <h2 className="text-3xl lg:text-5xl font-bold text-foreground mb-6">
+            <h2 className="text-2xl lg:text-5xl font-bold text-foreground mb-6">
               What our users say
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {testimonials.map((testimonial, index) => (
               <Card
                 key={index}
                 className="border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm"
               >
-                <CardContent className="p-8">
+                <CardContent className="p-6 lg:p-8">
                   <div className="flex mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star
                         key={i}
-                        className="h-5 w-5 text-yellow-400 fill-current"
+                        className="h-4 w-4 lg:h-5 lg:w-5 text-yellow-400 fill-current"
                       />
                     ))}
                   </div>
-                  <p className="text-foreground mb-6 leading-relaxed">
+                  <p className="text-sm lg:text-base text-foreground mb-6 leading-relaxed">
                     "{testimonial.content}"
                   </p>
                   <div>
                     <div className="font-semibold text-foreground">
                       {testimonial.name}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-xs lg:text-sm text-muted-foreground">
                       {testimonial.role}
                     </div>
                   </div>
@@ -291,31 +367,33 @@ const Landing = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 lg:py-32 bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
+      <section className="py-12 lg:py-32 bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl lg:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-2xl lg:text-5xl font-bold text-foreground mb-6">
             Ready to transform your
             <span className="block text-primary">markdown files?</span>
           </h2>
-          <p className="text-xl text-muted-foreground mb-12 leading-relaxed">
+          <p className="text-lg lg:text-xl text-muted-foreground mb-8 lg:mb-12 leading-relaxed">
             Join thousands of users who trust MarkdownPro for their document
             conversion needs. Start converting in seconds, no sign-up required.
           </p>
           <Button
-            size="lg"
+            size={isMobile ? "default" : "lg"}
             onClick={() => navigate("/converter")}
-            className="h-16 px-12 text-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300"
+            className={`${
+              isMobile ? "w-full" : "h-16 px-12"
+            } text-lg lg:text-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300`}
           >
             Start Converting Now
-            <ArrowRight className="ml-3 h-6 w-6" />
+            <ArrowRight className="ml-2 h-5 w-5 lg:h-6 lg:w-6" />
           </Button>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="p-2 bg-gradient-to-br from-primary to-primary/80 rounded-lg">
@@ -325,7 +403,7 @@ const Landing = () => {
                   MarkdownPro
                 </span>
               </div>
-              <p className="text-muted-foreground mb-6 max-w-md">
+              <p className="text-sm lg:text-base text-muted-foreground mb-6 max-w-md">
                 Professional markdown conversion tool that respects your privacy
                 and delivers beautiful results.
               </p>
@@ -342,38 +420,44 @@ const Landing = () => {
               </div>
             </div>
 
-            <div>
-              <h3 className="font-semibold text-foreground mb-4">Product</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+            <div className="space-y-4">
+              <h3 className="font-semibold text-foreground">Product</h3>
+              <ul className="space-y-2">
                 <li>
                   <Button
                     variant="link"
-                    className="p-0 h-auto"
+                    className="p-0 h-auto text-sm lg:text-base"
                     onClick={() => navigate("/features")}
                   >
                     Features
                   </Button>
                 </li>
                 <li>
-                  <Button variant="link" className="p-0 h-auto">
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto text-sm lg:text-base"
+                  >
                     Documentation
                   </Button>
                 </li>
                 <li>
-                  <Button variant="link" className="p-0 h-auto">
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto text-sm lg:text-base"
+                  >
                     API
                   </Button>
                 </li>
               </ul>
             </div>
 
-            <div>
-              <h3 className="font-semibold text-foreground mb-4">Support</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+            <div className="space-y-4">
+              <h3 className="font-semibold text-foreground">Support</h3>
+              <ul className="space-y-2">
                 <li>
                   <Button
                     variant="link"
-                    className="p-0 h-auto"
+                    className="p-0 h-auto text-sm lg:text-base"
                     onClick={() => navigate("/contact")}
                   >
                     Help Center
@@ -384,7 +468,7 @@ const Landing = () => {
                     href="https://rafay99.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                    className="text-sm lg:text-base text-muted-foreground hover:text-primary transition-colors"
                   >
                     Contact Us
                   </a>
@@ -392,7 +476,7 @@ const Landing = () => {
                 <li>
                   <Button
                     variant="link"
-                    className="p-0 h-auto"
+                    className="p-0 h-auto text-sm lg:text-base"
                     onClick={() => navigate("/privacy")}
                   >
                     Privacy Policy
@@ -401,7 +485,7 @@ const Landing = () => {
                 <li>
                   <Button
                     variant="link"
-                    className="p-0 h-auto"
+                    className="p-0 h-auto text-sm lg:text-base"
                     onClick={() => navigate("/terms")}
                   >
                     Terms of Service
@@ -411,7 +495,7 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="border-t mt-12 pt-8 text-center text-sm text-muted-foreground">
+          <div className="border-t mt-8 lg:mt-12 pt-8 text-center text-xs lg:text-sm text-muted-foreground">
             <p>
               &copy; 2024 MarkdownPro. All rights reserved. Made with ❤️ by{" "}
               <a
