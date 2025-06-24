@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, FileText, File } from 'lucide-react';
+import { Download, FileText, File, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { downloadAsHtml, downloadAsPdf } from '@/utils/downloadUtils';
 
@@ -62,34 +62,65 @@ const MarkdownDownloadSection = ({
   };
 
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Download className="h-5 w-5 text-blue-600" />
-          Download Options
-        </CardTitle>
-        <CardDescription>
-          Convert and download your markdown file
-        </CardDescription>
+    <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+      <CardHeader className="pb-4">
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Download className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <CardTitle className="text-xl">Export Options</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Choose your preferred format
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button
-          onClick={handleDownloadAsHtml}
-          className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
-          disabled={!markdownContent}
-        >
-          <FileText className="h-5 w-5 mr-2" />
-          Download as HTML
-        </Button>
-        <Button
-          onClick={handleDownloadAsPdf}
-          variant="outline"
-          className="w-full h-12 text-lg border-blue-600 text-blue-600 hover:bg-blue-50 transition-colors duration-200"
-          disabled={!markdownContent}
-        >
-          <File className="h-5 w-5 mr-2" />
-          Download as PDF
-        </Button>
+        <div className="space-y-3">
+          <Button
+            onClick={handleDownloadAsHtml}
+            className="w-full h-14 text-base bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300 group"
+            disabled={!markdownContent}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center">
+                <FileText className="h-5 w-5 mr-3" />
+                <div className="text-left">
+                  <div className="font-semibold">HTML Document</div>
+                  <div className="text-xs opacity-90">Web-ready format</div>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Button>
+
+          <Button
+            onClick={handleDownloadAsPdf}
+            variant="outline"
+            className="w-full h-14 text-base border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 group"
+            disabled={!markdownContent}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center">
+                <File className="h-5 w-5 mr-3 text-primary" />
+                <div className="text-left">
+                  <div className="font-semibold text-foreground">PDF Document</div>
+                  <div className="text-xs text-muted-foreground">Print-ready format</div>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Button>
+        </div>
+
+        {!markdownContent && (
+          <div className="text-center py-6 border-2 border-dashed border-muted rounded-lg">
+            <div className="text-muted-foreground text-sm">
+              Upload a markdown file to enable downloads
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
