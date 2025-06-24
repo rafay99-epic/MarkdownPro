@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MarkdownUploadSection from "./MarkdownUploadSection";
 import MarkdownDownloadSection from "./MarkdownDownloadSection";
@@ -12,9 +12,12 @@ import {
   ArrowLeft,
   Home,
   Settings2,
+  Upload,
+  Eye,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 const MarkdownConverter = () => {
   const navigate = useNavigate();
@@ -22,7 +25,7 @@ const MarkdownConverter = () => {
   const [htmlContent, setHtmlContent] = useState("");
   const [fileName, setFileName] = useState("");
   const [isDragging, setIsDragging] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [activeTab, setActiveTab] = useState("upload");
 
   // Default conversion options
   const [conversionOptions, setConversionOptions] = useState<ConversionOptions>(
@@ -41,6 +44,32 @@ const MarkdownConverter = () => {
       darkMode: false,
     }
   );
+
+  // Auto-switch to preview tab when file is uploaded
+  useEffect(() => {
+    if (markdownContent && htmlContent) {
+      // Always switch to preview when content is available, from any tab
+      setActiveTab("preview");
+    }
+  }, [markdownContent, htmlContent]);
+
+  // Handle file upload and navigation
+  const handleFileUpload = (content: string, html: string, name: string) => {
+    setMarkdownContent(content);
+    setHtmlContent(html);
+    setFileName(name);
+
+    // Always switch to preview after upload, regardless of current tab
+    setActiveTab("preview");
+  };
+
+  // Handle clearing/resetting when user wants to upload a new file
+  const handleNewUpload = () => {
+    setMarkdownContent("");
+    setHtmlContent("");
+    setFileName("");
+    setActiveTab("upload");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
@@ -73,15 +102,6 @@ const MarkdownConverter = () => {
             <Badge variant="secondary" className="hidden sm:flex">
               Privacy-First
             </Badge>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSettings(!showSettings)}
-              className="flex items-center space-x-2"
-            >
-              <Settings2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Settings</span>
-            </Button>
             <ThemeToggle />
             <Button
               variant="outline"
@@ -97,7 +117,7 @@ const MarkdownConverter = () => {
       </header>
 
       {/* Enhanced Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
         <div className="text-center mb-8">
           <Badge className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary border-primary/20 mb-4">
             <Zap className="h-4 w-4 mr-2" />
@@ -115,87 +135,236 @@ const MarkdownConverter = () => {
           </p>
         </div>
 
-        {/* Enhanced Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/20 dark:to-emerald-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <h3 className="font-semibold text-foreground mb-1 text-sm">
-              Easy Upload
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Drag & drop or click to upload
-            </p>
-          </div>
-          <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            </div>
-            <h3 className="font-semibold text-foreground mb-1 text-sm">
-              Instant Preview
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Real-time conversion and preview
-            </p>
-          </div>
-          <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Download className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h3 className="font-semibold text-foreground mb-1 text-sm">
-              Multiple Formats
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Export as HTML or PDF
-            </p>
-          </div>
-          <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Settings2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-            </div>
-            <h3 className="font-semibold text-foreground mb-1 text-sm">
-              Custom Styling
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Multiple themes and options
-            </p>
-          </div>
-        </div>
+        {/* Tab-Based Interface */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          {/* Tab Navigation */}
+          <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-lg mb-8 h-14">
+            <TabsTrigger
+              value="upload"
+              className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200 p-2"
+            >
+              <Upload className="h-4 w-4 text-emerald-600" />
+              <span className="text-xs sm:text-sm font-medium">Upload</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="settings"
+              className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200 p-2"
+            >
+              <Settings2 className="h-4 w-4 text-purple-600" />
+              <span className="text-xs sm:text-sm font-medium">Settings</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="preview"
+              className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200 p-2"
+              disabled={!markdownContent}
+            >
+              <Eye className="h-4 w-4 text-blue-600" />
+              <span className="text-xs sm:text-sm font-medium">Preview</span>
+              {!markdownContent && (
+                <Badge
+                  variant="outline"
+                  className="text-xs ml-1 hidden sm:block"
+                >
+                  Upload first
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="export"
+              className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200 p-2"
+              disabled={!markdownContent}
+            >
+              <Download className="h-4 w-4 text-orange-600" />
+              <span className="text-xs sm:text-sm font-medium">Export</span>
+              {!markdownContent && (
+                <Badge
+                  variant="outline"
+                  className="text-xs ml-1 hidden sm:block"
+                >
+                  Upload first
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Conversion Settings (Collapsible) */}
-        {showSettings && (
-          <ConversionSettings
-            options={conversionOptions}
-            onOptionsChange={setConversionOptions}
-          />
-        )}
+          {/* Tab Content */}
+          <div className="min-h-[600px]">
+            {/* Upload Tab */}
+            <TabsContent value="upload" className="mt-0">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/20 dark:to-emerald-800/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Upload className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2">
+                    Upload Your Markdown File
+                  </h2>
+                  <p className="text-muted-foreground max-w-xl mx-auto">
+                    Drag and drop your .md file or click to browse. All
+                    processing happens locally for complete privacy.
+                  </p>
+                </div>
 
-        {/* Main Content with Enhanced Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <MarkdownUploadSection
-            fileName={fileName}
-            isDragging={isDragging}
-            setMarkdownContent={setMarkdownContent}
-            setHtmlContent={setHtmlContent}
-            setFileName={setFileName}
-            setIsDragging={setIsDragging}
-            conversionOptions={conversionOptions}
-          />
+                {/* Enhanced Features Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                  <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/20 dark:to-emerald-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1 text-sm">
+                      Easy Upload
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Drag & drop or click to upload
+                    </p>
+                  </div>
+                  <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1 text-sm">
+                      Instant Preview
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Real-time conversion and preview
+                    </p>
+                  </div>
+                  <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <Download className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1 text-sm">
+                      Multiple Formats
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Export as HTML or PDF
+                    </p>
+                  </div>
+                  <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
+                    <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <Settings2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1 text-sm">
+                      Custom Styling
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Multiple themes and options
+                    </p>
+                  </div>
+                </div>
 
-          <MarkdownDownloadSection
-            markdownContent={markdownContent}
-            htmlContent={htmlContent}
-            fileName={fileName}
-            conversionOptions={conversionOptions}
-          />
-        </div>
+                <MarkdownUploadSection
+                  fileName={fileName}
+                  isDragging={isDragging}
+                  setMarkdownContent={setMarkdownContent}
+                  setHtmlContent={setHtmlContent}
+                  setFileName={setFileName}
+                  setIsDragging={setIsDragging}
+                  conversionOptions={conversionOptions}
+                />
+              </div>
+            </TabsContent>
 
-        <MarkdownPreviewSection
-          markdownContent={markdownContent}
-          htmlContent={htmlContent}
-          conversionOptions={conversionOptions}
-        />
+            {/* Settings Tab */}
+            <TabsContent value="settings" className="mt-0">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Settings2 className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2">
+                    Customize Your Document
+                  </h2>
+                  <p className="text-muted-foreground max-w-xl mx-auto">
+                    Choose themes, fonts, and export options to create the
+                    perfect document.
+                  </p>
+                  {markdownContent && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNewUpload}
+                      className="mt-4 flex items-center space-x-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      <span>Upload New File</span>
+                    </Button>
+                  )}
+                </div>
+                <ConversionSettings
+                  options={conversionOptions}
+                  onOptionsChange={setConversionOptions}
+                />
+              </div>
+            </TabsContent>
+
+            {/* Preview Tab */}
+            <TabsContent value="preview" className="mt-0">
+              <div className="max-w-full">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Eye className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2">Live Preview</h2>
+                  <p className="text-muted-foreground max-w-xl mx-auto">
+                    See how your document will look with the current settings.
+                  </p>
+                  {markdownContent && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNewUpload}
+                      className="mt-4 flex items-center space-x-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      <span>Upload New File</span>
+                    </Button>
+                  )}
+                </div>
+                <MarkdownPreviewSection
+                  markdownContent={markdownContent}
+                  htmlContent={htmlContent}
+                  conversionOptions={conversionOptions}
+                />
+              </div>
+            </TabsContent>
+
+            {/* Export Tab */}
+            <TabsContent value="export" className="mt-0">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/20 dark:to-orange-800/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Download className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2">
+                    Export Your Document
+                  </h2>
+                  <p className="text-muted-foreground max-w-xl mx-auto">
+                    Download your converted document as HTML or PDF with your
+                    chosen styling.
+                  </p>
+                  {markdownContent && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNewUpload}
+                      className="mt-4 flex items-center space-x-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      <span>Upload New File</span>
+                    </Button>
+                  )}
+                </div>
+                <MarkdownDownloadSection
+                  markdownContent={markdownContent}
+                  htmlContent={htmlContent}
+                  fileName={fileName}
+                  conversionOptions={conversionOptions}
+                />
+              </div>
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
 
       {/* Enhanced Footer */}
