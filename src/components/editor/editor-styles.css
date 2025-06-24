@@ -1,0 +1,87 @@
+.w-md-editor {
+    --md-editor-bg-color: hsl(var(--background));
+    --md-editor-color: hsl(var(--foreground));
+    --md-editor-border-color: hsl(var(--border));
+    --md-editor-toolbar-bg-color: hsl(var(--background));
+    --md-editor-toolbar-hover-color: hsl(var(--accent));
+    --md-editor-toolbar-active-color: hsl(var(--accent));
+    --md-editor-toolbar-color: hsl(var(--foreground));
+    background-color: hsl(var(--background)) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.w-md-editor-toolbar {
+    border-bottom: 1px solid hsl(var(--border)) !important;
+    background-color: hsl(var(--background)) !important;
+    padding: 8px !important;
+}
+
+.w-md-editor-toolbar ul li button {
+    color: hsl(var(--foreground)) !important;
+}
+
+.w-md-editor-toolbar ul li button:hover {
+    background-color: hsl(var(--accent)) !important;
+    color: hsl(var(--accent-foreground)) !important;
+}
+
+.w-md-editor-text {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+}
+
+.w-md-editor-text-pre>code,
+.w-md-editor-text-input {
+    color: hsl(var(--foreground)) !important;
+    background-color: transparent !important;
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+}
+
+.wmde-markdown {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+}
+
+.wmde-markdown h1,
+.wmde-markdown h2,
+.wmde-markdown h3,
+.wmde-markdown h4,
+.wmde-markdown h5,
+.wmde-markdown h6 {
+    color: hsl(var(--foreground)) !important;
+    border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+.wmde-markdown code {
+    background-color: hsl(var(--accent)/0.1) !important;
+    color: hsl(var(--foreground)) !important;
+}
+
+.wmde-markdown pre {
+    background-color: hsl(var(--accent)/0.1) !important;
+}
+
+.wmde-markdown blockquote {
+    border-left: 4px solid hsl(var(--primary)) !important;
+    color: hsl(var(--muted-foreground)) !important;
+    background-color: hsl(var(--accent)/0.1) !important;
+}
+
+.wmde-markdown table {
+    border-color: hsl(var(--border)) !important;
+}
+
+.wmde-markdown th {
+    background-color: hsl(var(--accent)/0.1) !important;
+    border-color: hsl(var(--border)) !important;
+}
+
+.wmde-markdown td {
+    border-color: hsl(var(--border)) !important;
+}
+
+.w-md-editor-preview {
+    box-shadow: inset 1px 0 0 0 hsl(var(--border)) !important;
+}

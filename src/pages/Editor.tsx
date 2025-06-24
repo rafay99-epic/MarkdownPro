@@ -1,7 +1,7 @@
 import React from "react";
-import MarkdownEditor from "@/components/MarkdownEditor";
+import { MarkdownEditorContainer } from "@/components/editor/MarkdownEditorContainer";
 
-const Editor = () => {
+export default function Editor() {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
@@ -11,9 +11,7 @@ const Editor = () => {
           conversion later.
         </p>
       </div>
-      <MarkdownEditor />
+      <MarkdownEditorContainer />
     </div>
   );
-};
-
-export default Editor;
+}
