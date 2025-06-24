@@ -1,10 +1,15 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, FileText, File, ArrowRight } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { downloadAsHtml, downloadAsPdf } from '@/utils/downloadUtils';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Download, FileText, File, ArrowRight } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { downloadAsHtml, downloadAsPdf } from "@/utils/downloadUtils";
 
 interface MarkdownDownloadSectionProps {
   markdownContent: string;
@@ -65,8 +70,8 @@ const MarkdownDownloadSection = ({
     <Card className="shadow-lg border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
       <CardHeader className="pb-4">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Download className="h-5 w-5 text-primary" />
+          <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
+            <Download className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
             <CardTitle className="text-xl">Export Options</CardTitle>
@@ -105,8 +110,12 @@ const MarkdownDownloadSection = ({
               <div className="flex items-center">
                 <File className="h-5 w-5 mr-3 text-primary" />
                 <div className="text-left">
-                  <div className="font-semibold text-foreground">PDF Document</div>
-                  <div className="text-xs text-muted-foreground">Print-ready format</div>
+                  <div className="font-semibold text-foreground">
+                    PDF Document
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Print-ready format
+                  </div>
                 </div>
               </div>
               <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />

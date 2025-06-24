@@ -1,8 +1,8 @@
-
-import MarkdownConverter from "@/components/MarkdownConverter";
+import React from "react";
+import Landing from "./Landing";
 
 const Index = () => {
-  return <MarkdownConverter />;
+  return <Landing />;
 };
 
 export default Index;
