@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Footer } from "@/components/Footer";
 import {
   ArrowLeft,
   FileText,
@@ -61,8 +62,12 @@ const Privacy = () => {
               <span>Back</span>
             </Button>
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-br from-primary to-primary/80 rounded-lg">
-                <FileText className="h-6 w-6 text-primary-foreground" />
+              <div className="w-8 h-8 rounded-lg overflow-hidden">
+                <img
+                  src="/markdownproIcon.png"
+                  alt="MarkdownPro"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
@@ -253,6 +258,7 @@ const Privacy = () => {
           </Button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Edit } from "lucide-react";
 import MarkdownConverter from "@/components/MarkdownConverter";
 import { useIsMobile } from "@/hooks/use-mobile";
-
+import { Footer } from "@/components/Footer";
 const Converter = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -64,6 +64,7 @@ const Converter = () => {
       <Card className="p-3 sm:p-6">
         <MarkdownConverter initialContent={initialContent} />
       </Card>
+      <Footer />
     </div>
   );
 };

@@ -1,313 +1,296 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { StorageManager, type MarkdownFile } from "@/utils/storageUtils";
-import { DraftsList } from "./DraftsList";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Save } from "lucide-react";
-import "./editor-styles.css";
+import { useToast } from "@/hooks/use-toast";
+import { type MarkdownFile } from "@/utils/storageUtils";
+import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
+import {
+  Bold,
+  Italic,
+  Heading,
+  List,
+  ListOrdered,
+  Quote,
+  Code,
+  Link as LinkIcon,
+  Image,
+  Table,
+  Strikethrough,
+  CheckSquare,
+} from "lucide-react";
 
-export function MarkdownEditorContainer() {
-  const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  const [currentFile, setCurrentFile] = React.useState<MarkdownFile | null>(
-    null
+interface MarkdownEditorContainerProps {
+  currentFile: MarkdownFile | null;
+  onSave: (file: MarkdownFile) => void;
+}
+
+interface ToolbarButtonProps {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  isActive?: boolean;
+}
+
+function ToolbarButton({ icon, label, onClick, isActive }: ToolbarButtonProps) {
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onClick}
+      className={cn(
+        "h-8 px-2 py-1",
+        isActive && "bg-accent text-accent-foreground"
+      )}
+      title={label}
+    >
+      {icon}
+    </Button>
   );
-  const [content, setContent] = React.useState("");
-  const [title, setTitle] = React.useState("");
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
-  const [files, setFiles] = React.useState<MarkdownFile[]>([]);
+}
+
+export function MarkdownEditorContainer({
+  currentFile,
+  onSave,
+}: MarkdownEditorContainerProps) {
+  const [content, setContent] = useState(currentFile?.content || "");
+  const [title, setTitle] = useState(currentFile?.title || "");
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const { toast } = useToast();
-  const saveTimeoutRef = React.useRef<NodeJS.Timeout>();
 
-  // Function to refresh files list - update to get both types
-  const refreshFiles = React.useCallback(() => {
-    // Get both edited and uploaded files
-    const editedFiles = StorageManager.getFilesByType("edited");
-    const uploadedFiles = StorageManager.getFilesByType("uploaded");
-    setFiles([...editedFiles, ...uploadedFiles]);
-  }, []);
-
-  // Initial load of files
-  React.useEffect(() => {
-    refreshFiles();
-  }, [refreshFiles]);
-
-  const generateTitle = (content: string): string => {
-    // Try to find the first heading
-    const headingMatch = content.match(/^#\s+(.+)$/m);
-    if (headingMatch) {
-      return headingMatch[1].trim();
+  useEffect(() => {
+    if (currentFile) {
+      setContent(currentFile.content);
+      setTitle(currentFile.title);
+      setHasChanges(false);
+    } else {
+      setContent("");
+      setTitle("");
+      setHasChanges(false);
     }
+  }, [currentFile]);
 
-    // If no heading, take the first line that's not empty
-    const firstLine = content.split("\n").find((line) => line.trim() !== "");
-    if (firstLine) {
-      return (
-        firstLine.trim().slice(0, 50) + (firstLine.length > 50 ? "..." : "")
-      );
-    }
+  const handleSave = useCallback(async () => {
+    if (!currentFile) return;
 
-    // Fallback to timestamp-based title
-    return `Untitled Document ${new Date().toLocaleString()}`;
-  };
-
-  const createNewDraft = () => {
-    const newFile: MarkdownFile = {
-      id: Date.now().toString(),
-      title: "Untitled Document",
-      content: "",
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      type: "edited",
-      size: 0,
-    };
-
-    StorageManager.saveFile(newFile);
-    setCurrentFile(newFile);
-    setContent("");
-    setTitle("Untitled Document");
-    setHasUnsavedChanges(false);
-    refreshFiles(); // Refresh the files list
-    toast({
-      title: "New Draft Created",
-      description: "Start writing your markdown content.",
-    });
-  };
-
-  const updateDraft = React.useCallback(
-    async (newContent: string, showToast = false) => {
-      if (!currentFile) {
-        // Create a new file if none exists
-        const newTitle = newContent
-          ? generateTitle(newContent)
-          : "Untitled Document";
-        const newFile: MarkdownFile = {
-          id: Date.now().toString(),
-          title: newTitle,
-          content: newContent,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          type: "edited",
-          size: newContent.length,
-        };
-        setCurrentFile(newFile);
-        setTitle(newTitle);
-        setContent(newContent);
-        await StorageManager.saveFile(newFile);
-        refreshFiles(); // Refresh after creating new file
-        toast({
-          title: "New Draft Created",
-          description: "Your content has been saved as a new draft.",
-        });
-        return;
-      }
-
-      setIsSaving(true);
+    setIsSaving(true);
+    try {
       const updatedFile: MarkdownFile = {
         ...currentFile,
-        title: title || generateTitle(newContent),
-        content: newContent,
+        title: title.trim() || "Untitled Document",
+        content,
         updatedAt: Date.now(),
-        size: newContent.length,
       };
 
-      try {
-        await StorageManager.saveFile(updatedFile);
-        setCurrentFile(updatedFile);
-        setHasUnsavedChanges(false);
-        refreshFiles(); // Refresh after updating file
-        if (showToast) {
-          toast({
-            title: "Draft Saved",
-            description: "Your changes have been saved successfully.",
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Save Failed",
-          description: "Failed to save your changes. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsSaving(false);
-      }
-    },
-    [currentFile, title, toast, refreshFiles]
-  );
-
-  const handleContentChange = React.useCallback(
-    (value?: string) => {
-      if (value === undefined) return;
-      setContent(value);
-      setHasUnsavedChanges(true);
-
-      // Clear existing timeout
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-
-      // Set new timeout for auto-save
-      saveTimeoutRef.current = setTimeout(() => {
-        updateDraft(value);
-      }, 1000);
-    },
-    [updateDraft]
-  );
-
-  // Cleanup timeout on unmount
-  React.useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleManualSave = () => {
-    // Clear any pending auto-save
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    updateDraft(content, true);
-  };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
-    setTitle(newTitle);
-    setHasUnsavedChanges(true);
-
-    // Auto-save after title change
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    saveTimeoutRef.current = setTimeout(() => {
-      if (currentFile) {
-        const updatedFile = {
-          ...currentFile,
-          title: newTitle || generateTitle(content),
-          updatedAt: Date.now(),
-        };
-        setCurrentFile(updatedFile);
-        StorageManager.saveFile(updatedFile);
-        setHasUnsavedChanges(false);
-        refreshFiles(); // Refresh after title update
-      }
-    }, 1000);
-  };
-
-  const handleFileSelect = (file: MarkdownFile) => {
-    setCurrentFile(file);
-    setContent(file.content);
-    setTitle(file.title);
-    setHasUnsavedChanges(false);
-  };
-
-  const handleFileDelete = async (id: string) => {
-    try {
-      await StorageManager.deleteFile(id);
-      if (currentFile?.id === id) {
-        setCurrentFile(null);
-        setContent("");
-        setTitle("");
-        setHasUnsavedChanges(false);
-      }
-      refreshFiles(); // Refresh after deletion
+      await onSave(updatedFile);
+      setHasChanges(false);
       toast({
-        title: "Draft Deleted",
-        description: "The draft has been removed.",
+        title: "Changes saved",
+        description: "Your document has been saved successfully.",
       });
     } catch (error) {
       toast({
-        title: "Delete Failed",
-        description: "Failed to delete the draft. Please try again.",
+        title: "Save failed",
+        description: "Failed to save your changes. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
-  };
+  }, [currentFile, content, title, onSave, toast]);
 
-  const handleFileDownload = (file: MarkdownFile) => {
-    StorageManager.downloadFile(file);
-    toast({
-      title: "Draft Downloaded",
-      description: `${file.title}.md has been downloaded.`,
-    });
-  };
+  const handleContentChange = useCallback(
+    (value?: string) => {
+      setContent(value || "");
+      setHasChanges(true);
 
-  const handleFileConvert = (file: MarkdownFile) => {
-    sessionStorage.setItem("convertFile", JSON.stringify(file));
-    navigate("/converter");
-  };
+      // Auto-generate title from first heading if title is empty
+      if (!title && value) {
+        const headingMatch = value.match(/^#\s+(.+)$/m);
+        if (headingMatch) {
+          setTitle(headingMatch[1].trim());
+        }
+      }
+    },
+    [title]
+  );
 
-  const handleFileUpload = (file: MarkdownFile) => {
-    StorageManager.saveFile(file);
-    setCurrentFile(file);
-    setContent(file.content);
-    setTitle(file.title);
-    setHasUnsavedChanges(false);
-    refreshFiles();
-  };
+  const handleTitleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTitle(e.target.value);
+      setHasChanges(true);
+    },
+    []
+  );
+
+  const insertText = useCallback(
+    (before: string, after: string = "") => {
+      const textarea = document.querySelector(
+        ".w-md-editor-text-input"
+      ) as HTMLTextAreaElement;
+      if (!textarea) return;
+
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = content.substring(start, end);
+      const newText = `${content.substring(
+        0,
+        start
+      )}${before}${selectedText}${after}${content.substring(end)}`;
+
+      handleContentChange(newText);
+
+      // Set cursor position after insertion
+      setTimeout(() => {
+        textarea.selectionStart = start + before.length;
+        textarea.selectionEnd = end + before.length;
+        textarea.focus();
+      }, 0);
+    },
+    [content, handleContentChange]
+  );
+
+  const toolbarActions = [
+    {
+      icon: <Bold className="h-4 w-4" />,
+      label: "Bold",
+      onClick: () => insertText("**", "**"),
+    },
+    {
+      icon: <Italic className="h-4 w-4" />,
+      label: "Italic",
+      onClick: () => insertText("*", "*"),
+    },
+    {
+      icon: <Strikethrough className="h-4 w-4" />,
+      label: "Strikethrough",
+      onClick: () => insertText("~~", "~~"),
+    },
+    {
+      icon: <Heading className="h-4 w-4" />,
+      label: "Heading",
+      onClick: () => insertText("### "),
+    },
+    {
+      icon: <List className="h-4 w-4" />,
+      label: "Bullet List",
+      onClick: () => insertText("- "),
+    },
+    {
+      icon: <ListOrdered className="h-4 w-4" />,
+      label: "Numbered List",
+      onClick: () => insertText("1. "),
+    },
+    {
+      icon: <CheckSquare className="h-4 w-4" />,
+      label: "Task List",
+      onClick: () => insertText("- [ ] "),
+    },
+    {
+      icon: <Quote className="h-4 w-4" />,
+      label: "Quote",
+      onClick: () => insertText("> "),
+    },
+    {
+      icon: <Code className="h-4 w-4" />,
+      label: "Code",
+      onClick: () => insertText("```\n", "\n```"),
+    },
+    {
+      icon: <LinkIcon className="h-4 w-4" />,
+      label: "Link",
+      onClick: () => insertText("[", "](url)"),
+    },
+    {
+      icon: <Image className="h-4 w-4" />,
+      label: "Image",
+      onClick: () => insertText("![alt text](", ")"),
+    },
+    {
+      icon: <Table className="h-4 w-4" />,
+      label: "Table",
+      onClick: () =>
+        insertText(
+          "\n| Header 1 | Header 2 |\n| --------- | --------- |\n| Cell 1 | Cell 2 |\n"
+        ),
+    },
+  ];
+
+  if (!currentFile) {
+    return (
+      <div className="h-full flex items-center justify-center bg-background/50 rounded-lg border">
+        <div className="text-center space-y-2 max-w-md mx-auto p-8">
+          <h3 className="text-lg font-semibold">No Document Selected</h3>
+          <p className="text-sm text-muted-foreground">
+            Select a document from the Files tab or create a new one to start
+            editing.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-12 min-h-[calc(100vh-8rem)]">
-      {/* Drafts Sidebar */}
-      <div className={`${isMobile ? "col-span-12" : "col-span-3"} border-r`}>
-        <DraftsList
-          currentFile={currentFile}
-          files={files}
-          onFileSelect={handleFileSelect}
-          onCreateNew={createNewDraft}
-          onFileDelete={handleFileDelete}
-          onFileConvert={handleFileConvert}
-          onFileDownload={handleFileDownload}
-          onFileUpload={handleFileUpload}
-        />
-      </div>
-
-      {/* Editor */}
-      <div
-        className={`${
-          isMobile ? "col-span-12" : "col-span-9"
-        } bg-background flex flex-col`}
-      >
-        <div className="p-4 border-b flex items-center justify-between">
+    <div className="h-full flex flex-col rounded-lg border bg-background">
+      <div className="flex items-center justify-between gap-4 p-4 border-b bg-background/50">
+        <div className="flex-1">
           <Input
-            type="text"
-            placeholder="Untitled Document"
             value={title}
             onChange={handleTitleChange}
-            className="text-lg font-medium border-0 px-0 focus-visible:ring-0 w-auto flex-1 mr-4"
+            placeholder="Untitled Document"
+            className="text-lg font-medium bg-transparent border-none shadow-none focus-visible:ring-0 px-0 h-auto"
           />
-          <Button
-            onClick={handleManualSave}
-            disabled={!hasUnsavedChanges || isSaving}
-            variant="outline"
-            className="gap-2"
-          >
-            <Save className="h-4 w-4" />
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
+          <p className="text-xs text-muted-foreground mt-1">
+            Last updated: {new Date(currentFile.updatedAt).toLocaleString()}
+          </p>
         </div>
-        <div className="flex-1 p-4">
-          <MDEditor
-            value={content}
-            onChange={handleContentChange}
-            preview="live"
-            height="100%"
-            hideToolbar={false}
-            enableScroll={true}
-            textareaProps={{
-              placeholder: "Write your markdown here...",
-            }}
-            previewOptions={{
-              className: "wmde-markdown",
-            }}
-          />
-        </div>
+        <Button
+          variant={hasChanges ? "default" : "ghost"}
+          size="sm"
+          onClick={handleSave}
+          disabled={!hasChanges || isSaving}
+          className={cn(
+            "transition-all duration-200 bg-primary/10 hover:bg-primary/20",
+            hasChanges && "text-primary"
+          )}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          {isSaving ? "Saving..." : hasChanges ? "Save Changes" : "Saved"}
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-1 p-2 border-b bg-muted/40">
+        {toolbarActions.map((action, index) => (
+          <React.Fragment key={action.label}>
+            <ToolbarButton {...action} />
+            {(index + 1) % 3 === 0 && (
+              <Separator orientation="vertical" className="h-6 mx-1" />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+
+      <div className="flex-1 min-h-0">
+        <MDEditor
+          value={content}
+          onChange={handleContentChange}
+          preview="edit"
+          className="!bg-background border-none h-full"
+          height="100%"
+          hideToolbar={true}
+          textareaProps={{
+            placeholder: "Write your markdown here...",
+          }}
+          previewOptions={{
+            className: "prose dark:prose-invert max-w-none",
+          }}
+          components={{
+            toolbar: () => null,
+          }}
+        />
       </div>
     </div>
   );

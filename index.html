@@ -67,68 +67,10 @@
     <link rel="icon" type="image/png" href="/markdownproIcon.png" />
     <link rel="apple-touch-icon" href="/markdownPro.png" />
     <link rel="mask-icon" href="/markdownproIcon.png" color="#2563eb" />
-
-    <!-- Placeholder for loading state -->
-    <style>
-      #app-loading-placeholder {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: #ffffff;
-        transition: opacity 0.3s ease-in-out;
-      }
-      @media (prefers-color-scheme: dark) {
-        #app-loading-placeholder {
-          background: #1a1b26;
-        }
-      }
-      .loading-logo {
-        width: 120px;
-        height: 120px;
-        margin-bottom: 24px;
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-      }
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.5;
-        }
-      }
-      .loading-text {
-        font-family: system-ui, -apple-system, sans-serif;
-        font-size: 1.25rem;
-        color: #1f2937;
-        margin: 0;
-        text-align: center;
-      }
-      @media (prefers-color-scheme: dark) {
-        .loading-text {
-          color: #e5e7eb;
-        }
-      }
-    </style>
   </head>
 
   <body>
-    <div id="root">
-      <div id="app-loading-placeholder">
-        <img
-          src="/markdownproIcon.png"
-          alt="Markdown Pro"
-          class="loading-logo"
-        />
-        <p class="loading-text">Loading Markdown Pro...</p>
-      </div>
-    </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,21 +1,34 @@
-import React from "react";
-import { Moon, Sun } from "lucide-react";
+import * as React from "react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ThemeSelector } from "./ThemeSelector";
+import { themeGroups } from "@/lib/theme-config";
 
-export const ThemeToggle = () => {
-  const { theme, setTheme } = useTheme();
+export function ThemeToggle() {
+  const { theme } = useTheme();
+
+  const currentTheme =
+    themeGroups
+      .flatMap((group) => group.themes)
+      .find((t) => t.value === theme) || themeGroups[0].themes[0];
+  const Icon = currentTheme.icon;
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      className="bg-background/80 backdrop-blur-sm border-border/50 hover:bg-muted/80 transition-all duration-200 hover:scale-105"
-    >
-      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-yellow-500" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-blue-400" />
-      <span className="sr-only">Toggle theme</span>
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Icon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[340px] p-3">
+        <ThemeSelector />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
-};
+}
