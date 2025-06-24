@@ -20,7 +20,8 @@ import {
   validateMarkdownFile,
   readFileAsText,
   convertMarkdownToHtml,
-  convertMarkdownToStyledHtml,
+  saveFileToStorage,
+  StoredMarkdownFile,
 } from "@/utils/markdownUtils";
 import { ConversionOptions } from "./ConversionSettings";
 
@@ -32,6 +33,7 @@ interface MarkdownUploadSectionProps {
   setFileName: (name: string) => void;
   setIsDragging: (dragging: boolean) => void;
   conversionOptions: ConversionOptions;
+  onFileUploaded?: (file: StoredMarkdownFile) => void;
 }
 
 const MarkdownUploadSection = ({
@@ -42,6 +44,7 @@ const MarkdownUploadSection = ({
   setFileName,
   setIsDragging,
   conversionOptions,
+  onFileUploaded,
 }: MarkdownUploadSectionProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<
@@ -56,7 +59,7 @@ const MarkdownUploadSection = ({
         toast({
           title: "Invalid file type",
           description:
-            "Please upload a valid markdown file (.md or .markdown).",
+            "Please upload a valid markdown file (.md or .mdx only).",
           variant: "destructive",
         });
         return;
@@ -72,29 +75,52 @@ const MarkdownUploadSection = ({
           conversionOptions
         );
 
+        const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+
+        // Save to local storage
+        const storedFile = saveFileToStorage(
+          fileNameWithoutExt,
+          content,
+          htmlContent,
+          file.name
+        );
+
+        // Update current state
         setMarkdownContent(content);
         setHtmlContent(htmlContent);
-        setFileName(file.name.replace(/\.[^/.]+$/, "")); // Remove extension
+        setFileName(fileNameWithoutExt);
         setUploadStatus("success");
+
+        // Notify parent component
+        onFileUploaded?.(storedFile);
 
         toast({
           title: "File uploaded successfully!",
-          description: `${file.name} has been converted and is ready for preview.`,
+          description: `${file.name} has been saved and is ready for preview.`,
         });
       } catch (error) {
         console.error("Error processing file:", error);
         setUploadStatus("error");
+
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
         toast({
           title: "Error processing file",
-          description:
-            "There was an error converting your markdown file. Please try again.",
+          description: errorMessage,
           variant: "destructive",
         });
       } finally {
         setIsProcessing(false);
       }
     },
-    [setMarkdownContent, setHtmlContent, setFileName, conversionOptions, toast]
+    [
+      setMarkdownContent,
+      setHtmlContent,
+      setFileName,
+      conversionOptions,
+      toast,
+      onFileUploaded,
+    ]
   );
 
   const handleDragOver = useCallback(
@@ -132,6 +158,8 @@ const MarkdownUploadSection = ({
       if (files.length > 0) {
         processFile(files[0]);
       }
+      // Reset input value to allow re-uploading the same file
+      e.target.value = "";
     },
     [processFile]
   );
@@ -166,7 +194,7 @@ const MarkdownUploadSection = ({
           <div>
             <CardTitle className="text-xl">Upload Markdown</CardTitle>
             <CardDescription>
-              Drag and drop your .md file or click to browse
+              Drag and drop your .md or .mdx file or click to browse
             </CardDescription>
           </div>
         </div>
@@ -191,7 +219,7 @@ const MarkdownUploadSection = ({
               <div className="flex flex-col items-center space-y-3">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
                 <p className="text-sm text-muted-foreground">
-                  Processing your markdown...
+                  Processing and saving your markdown...
                 </p>
               </div>
             </div>
@@ -207,21 +235,21 @@ const MarkdownUploadSection = ({
                 <div className="flex items-center justify-center space-x-2 mb-4">
                   <FileText className="h-4 w-4 text-emerald-600" />
                   <span className="text-sm font-medium text-emerald-600">
-                    {fileName}.md
+                    {fileName}
                   </span>
                   <Badge
                     variant="outline"
                     className="text-xs border-emerald-200 text-emerald-600"
                   >
-                    Ready
+                    Saved
                   </Badge>
                 </div>
               )}
               <p className="text-muted-foreground mb-6">
                 {uploadStatus === "idle"
-                  ? "Support for .md and .markdown files. All processing happens locally in your browser."
+                  ? "Support for .md and .mdx files. Files are saved locally in your browser for easy access."
                   : uploadStatus === "success"
-                  ? "Your file has been converted and is ready for preview and export."
+                  ? "Your file has been saved locally and is ready for preview and export."
                   : "Please check your file format and try again."}
               </p>
             </div>
@@ -229,7 +257,7 @@ const MarkdownUploadSection = ({
             <div className="space-y-3">
               <input
                 type="file"
-                accept=".md,.markdown"
+                accept=".md,.mdx"
                 onChange={handleFileSelect}
                 className="hidden"
                 id="markdown-upload"
@@ -266,7 +294,7 @@ const MarkdownUploadSection = ({
                 <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                   <div className="flex items-center space-x-1">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                    <span>Converted</span>
+                    <span>Saved Locally</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>

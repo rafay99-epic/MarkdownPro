@@ -4,6 +4,7 @@ import MarkdownUploadSection from "./MarkdownUploadSection";
 import MarkdownDownloadSection from "./MarkdownDownloadSection";
 import MarkdownPreviewSection from "./MarkdownPreviewSection";
 import ConversionSettings, { ConversionOptions } from "./ConversionSettings";
+import FileManager from "./FileManager";
 import { ThemeToggle } from "./ThemeToggle";
 import {
   FileText,
@@ -14,18 +15,22 @@ import {
   Settings2,
   Upload,
   Eye,
+  FolderOpen,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { StoredMarkdownFile, getStoredFiles } from "@/utils/markdownUtils";
 
 const MarkdownConverter = () => {
   const navigate = useNavigate();
   const [markdownContent, setMarkdownContent] = useState("");
   const [htmlContent, setHtmlContent] = useState("");
   const [fileName, setFileName] = useState("");
+  const [currentFileId, setCurrentFileId] = useState<string | undefined>();
   const [isDragging, setIsDragging] = useState(false);
-  const [activeTab, setActiveTab] = useState("upload");
+  const [activeTab, setActiveTab] = useState("files");
+  const [hasStoredFiles, setHasStoredFiles] = useState(false);
 
   // Default conversion options
   const [conversionOptions, setConversionOptions] = useState<ConversionOptions>(
@@ -45,29 +50,45 @@ const MarkdownConverter = () => {
     }
   );
 
-  // Auto-switch to preview tab when file is uploaded
+  // Check for stored files on component mount
+  useEffect(() => {
+    const storedFiles = getStoredFiles();
+    setHasStoredFiles(storedFiles.length > 0);
+
+    // If no stored files, start with upload tab
+    if (storedFiles.length === 0) {
+      setActiveTab("upload");
+    }
+  }, []);
+
+  // Auto-switch to preview tab when file is uploaded or selected
   useEffect(() => {
     if (markdownContent && htmlContent) {
-      // Always switch to preview when content is available, from any tab
+      // Always switch to preview when content is available
       setActiveTab("preview");
     }
   }, [markdownContent, htmlContent]);
 
-  // Handle file upload and navigation
-  const handleFileUpload = (content: string, html: string, name: string) => {
-    setMarkdownContent(content);
-    setHtmlContent(html);
-    setFileName(name);
-
-    // Always switch to preview after upload, regardless of current tab
-    setActiveTab("preview");
+  // Handle file selection from file manager
+  const handleFileSelect = (file: StoredMarkdownFile) => {
+    setMarkdownContent(file.content);
+    setHtmlContent(file.htmlContent);
+    setFileName(file.name);
+    setCurrentFileId(file.id);
   };
 
-  // Handle clearing/resetting when user wants to upload a new file
+  // Handle new file upload
+  const handleFileUploaded = (file: StoredMarkdownFile) => {
+    setCurrentFileId(file.id);
+    setHasStoredFiles(true);
+  };
+
+  // Handle uploading a new file (clear current state)
   const handleNewUpload = () => {
     setMarkdownContent("");
     setHtmlContent("");
     setFileName("");
+    setCurrentFileId(undefined);
     setActiveTab("upload");
   };
 
@@ -128,17 +149,32 @@ const MarkdownConverter = () => {
             <span className="block text-primary">Into Beautiful Documents</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Upload your markdown files and convert them to stunning HTML pages
-            or professional PDF documents with customizable themes and styling
-            options. All processing happens locally in your browser for complete
-            privacy.
+            Upload multiple markdown files (.md, .mdx), switch between them
+            easily, and convert them to stunning HTML pages or professional PDF
+            documents. All files are stored locally in your browser for privacy
+            and easy access.
           </p>
         </div>
 
         {/* Tab-Based Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Tab Navigation */}
-          <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-lg mb-8 h-14">
+          <TabsList className="grid w-full grid-cols-5 bg-muted/50 p-1 rounded-lg mb-8 h-14">
+            <TabsTrigger
+              value="files"
+              className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200 p-2"
+            >
+              <FolderOpen className="h-4 w-4 text-blue-600" />
+              <span className="text-xs sm:text-sm font-medium">Files</span>
+              {hasStoredFiles && (
+                <Badge
+                  variant="secondary"
+                  className="text-xs ml-1 hidden sm:block"
+                >
+                  {getStoredFiles().length}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger
               value="upload"
               className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200 p-2"
@@ -165,7 +201,7 @@ const MarkdownConverter = () => {
                   variant="outline"
                   className="text-xs ml-1 hidden sm:block"
                 >
-                  Upload first
+                  Select file
                 </Badge>
               )}
             </TabsTrigger>
@@ -181,7 +217,7 @@ const MarkdownConverter = () => {
                   variant="outline"
                   className="text-xs ml-1 hidden sm:block"
                 >
-                  Upload first
+                  Select file
                 </Badge>
               )}
             </TabsTrigger>
@@ -189,6 +225,27 @@ const MarkdownConverter = () => {
 
           {/* Tab Content */}
           <div className="min-h-[600px]">
+            {/* Files Tab */}
+            <TabsContent value="files" className="mt-0">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FolderOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2">File Manager</h2>
+                  <p className="text-muted-foreground max-w-xl mx-auto">
+                    Manage your uploaded markdown files. All files are stored
+                    locally in your browser for privacy.
+                  </p>
+                </div>
+                <FileManager
+                  currentFileId={currentFileId}
+                  onFileSelect={handleFileSelect}
+                  onNewUpload={handleNewUpload}
+                />
+              </div>
+            </TabsContent>
+
             {/* Upload Tab */}
             <TabsContent value="upload" className="mt-0">
               <div className="max-w-4xl mx-auto">
@@ -197,11 +254,11 @@ const MarkdownConverter = () => {
                     <Upload className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <h2 className="text-2xl font-bold mb-2">
-                    Upload Your Markdown File
+                    Upload Markdown File
                   </h2>
                   <p className="text-muted-foreground max-w-xl mx-auto">
-                    Drag and drop your .md file or click to browse. All
-                    processing happens locally for complete privacy.
+                    Upload .md or .mdx files. Each file is automatically saved
+                    locally for easy access later.
                   </p>
                 </div>
 
@@ -212,10 +269,10 @@ const MarkdownConverter = () => {
                       <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <h3 className="font-semibold text-foreground mb-1 text-sm">
-                      Easy Upload
+                      Multiple Files
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      Drag & drop or click to upload
+                      Upload and manage multiple files
                     </p>
                   </div>
                   <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
@@ -223,10 +280,10 @@ const MarkdownConverter = () => {
                       <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <h3 className="font-semibold text-foreground mb-1 text-sm">
-                      Instant Preview
+                      Local Storage
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      Real-time conversion and preview
+                      Files saved in your browser
                     </p>
                   </div>
                   <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
@@ -234,10 +291,10 @@ const MarkdownConverter = () => {
                       <Download className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <h3 className="font-semibold text-foreground mb-1 text-sm">
-                      Multiple Formats
+                      Easy Access
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      Export as HTML or PDF
+                      Switch between files instantly
                     </p>
                   </div>
                   <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
@@ -245,10 +302,10 @@ const MarkdownConverter = () => {
                       <Settings2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                     </div>
                     <h3 className="font-semibold text-foreground mb-1 text-sm">
-                      Custom Styling
+                      .md & .mdx
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      Multiple themes and options
+                      Support for both formats
                     </p>
                   </div>
                 </div>
@@ -261,6 +318,7 @@ const MarkdownConverter = () => {
                   setFileName={setFileName}
                   setIsDragging={setIsDragging}
                   conversionOptions={conversionOptions}
+                  onFileUploaded={handleFileUploaded}
                 />
               </div>
             </TabsContent>
@@ -310,15 +368,26 @@ const MarkdownConverter = () => {
                     See how your document will look with the current settings.
                   </p>
                   {markdownContent && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleNewUpload}
-                      className="mt-4 flex items-center space-x-2"
-                    >
-                      <Upload className="h-4 w-4" />
-                      <span>Upload New File</span>
-                    </Button>
+                    <div className="flex items-center justify-center space-x-4 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveTab("files")}
+                        className="flex items-center space-x-2"
+                      >
+                        <FolderOpen className="h-4 w-4" />
+                        <span>Switch File</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleNewUpload}
+                        className="flex items-center space-x-2"
+                      >
+                        <Upload className="h-4 w-4" />
+                        <span>Upload New</span>
+                      </Button>
+                    </div>
                   )}
                 </div>
                 <MarkdownPreviewSection
@@ -344,15 +413,26 @@ const MarkdownConverter = () => {
                     chosen styling.
                   </p>
                   {markdownContent && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleNewUpload}
-                      className="mt-4 flex items-center space-x-2"
-                    >
-                      <Upload className="h-4 w-4" />
-                      <span>Upload New File</span>
-                    </Button>
+                    <div className="flex items-center justify-center space-x-4 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveTab("files")}
+                        className="flex items-center space-x-2"
+                      >
+                        <FolderOpen className="h-4 w-4" />
+                        <span>Switch File</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleNewUpload}
+                        className="flex items-center space-x-2"
+                      >
+                        <Upload className="h-4 w-4" />
+                        <span>Upload New</span>
+                      </Button>
+                    </div>
                   )}
                 </div>
                 <MarkdownDownloadSection

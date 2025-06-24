@@ -989,11 +989,7 @@ export const convertMarkdownToStyledHtml = async (
 };
 
 export const validateMarkdownFile = (file: File): boolean => {
-  return (
-    file.type === "text/markdown" ||
-    file.name.endsWith(".md") ||
-    file.name.endsWith(".markdown")
-  );
+  return file.name.endsWith(".md") || file.name.endsWith(".mdx");
 };
 
 export const readFileAsText = (file: File): Promise<string> => {
@@ -1006,4 +1002,100 @@ export const readFileAsText = (file: File): Promise<string> => {
     reader.onerror = () => reject(new Error("Failed to read file"));
     reader.readAsText(file);
   });
+};
+
+// Local Storage utilities for managing multiple files
+export interface StoredMarkdownFile {
+  id: string;
+  name: string;
+  originalName: string;
+  content: string;
+  htmlContent: string;
+  uploadDate: string;
+  lastModified: string;
+}
+
+const STORAGE_KEY = "markdownpro_files";
+const MAX_FILES = 10; // Limit to prevent storage overflow
+
+export const saveFileToStorage = (
+  name: string,
+  content: string,
+  htmlContent: string,
+  originalName: string
+): StoredMarkdownFile => {
+  const files = getStoredFiles();
+
+  const newFile: StoredMarkdownFile = {
+    id: `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name,
+    originalName,
+    content,
+    htmlContent,
+    uploadDate: new Date().toISOString(),
+    lastModified: new Date().toISOString(),
+  };
+
+  // Remove oldest files if we exceed the limit
+  const updatedFiles = [newFile, ...files].slice(0, MAX_FILES);
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedFiles));
+    return newFile;
+  } catch (error) {
+    console.error("Error saving file to storage:", error);
+    throw new Error("Failed to save file. Storage might be full.");
+  }
+};
+
+export const getStoredFiles = (): StoredMarkdownFile[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error("Error reading stored files:", error);
+    return [];
+  }
+};
+
+export const getStoredFileById = (id: string): StoredMarkdownFile | null => {
+  const files = getStoredFiles();
+  return files.find((file) => file.id === id) || null;
+};
+
+export const deleteStoredFile = (id: string): void => {
+  const files = getStoredFiles();
+  const updatedFiles = files.filter((file) => file.id !== id);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedFiles));
+};
+
+export const updateStoredFile = (
+  id: string,
+  updates: Partial<StoredMarkdownFile>
+): void => {
+  const files = getStoredFiles();
+  const updatedFiles = files.map((file) =>
+    file.id === id
+      ? { ...file, ...updates, lastModified: new Date().toISOString() }
+      : file
+  );
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedFiles));
+};
+
+export const clearAllStoredFiles = (): void => {
+  localStorage.removeItem(STORAGE_KEY);
+};
+
+export const getStorageUsage = (): { used: number; percentage: number } => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const usedBytes = new Blob([stored || ""]).size;
+    const maxBytes = 5 * 1024 * 1024; // Assume 5MB limit for localStorage
+    return {
+      used: usedBytes,
+      percentage: (usedBytes / maxBytes) * 100,
+    };
+  } catch {
+    return { used: 0, percentage: 0 };
+  }
 };
