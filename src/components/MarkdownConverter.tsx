@@ -3,8 +3,16 @@ import { useNavigate } from "react-router-dom";
 import MarkdownUploadSection from "./MarkdownUploadSection";
 import MarkdownDownloadSection from "./MarkdownDownloadSection";
 import MarkdownPreviewSection from "./MarkdownPreviewSection";
+import ConversionSettings, { ConversionOptions } from "./ConversionSettings";
 import { ThemeToggle } from "./ThemeToggle";
-import { FileText, Zap, Download, ArrowLeft, Home } from "lucide-react";
+import {
+  FileText,
+  Zap,
+  Download,
+  ArrowLeft,
+  Home,
+  Settings2,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 
@@ -14,6 +22,25 @@ const MarkdownConverter = () => {
   const [htmlContent, setHtmlContent] = useState("");
   const [fileName, setFileName] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Default conversion options
+  const [conversionOptions, setConversionOptions] = useState<ConversionOptions>(
+    {
+      theme: "github",
+      fontSize: "medium",
+      fontFamily: "system",
+      lineHeight: "normal",
+      includeToc: false,
+      syntaxHighlighting: true,
+      pdfPageSize: "a4",
+      pdfMargins: "normal",
+      externalLinksNewTab: true,
+      includePageNumbers: false,
+      includeTimestamp: false,
+      darkMode: false,
+    }
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
@@ -46,6 +73,15 @@ const MarkdownConverter = () => {
             <Badge variant="secondary" className="hidden sm:flex">
               Privacy-First
             </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSettings(!showSettings)}
+              className="flex items-center space-x-2"
+            >
+              <Settings2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </Button>
             <ThemeToggle />
             <Button
               variant="outline"
@@ -73,13 +109,14 @@ const MarkdownConverter = () => {
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Upload your markdown files and convert them to stunning HTML pages
-            or professional PDF documents. All processing happens locally in
-            your browser.
+            or professional PDF documents with customizable themes and styling
+            options. All processing happens locally in your browser for complete
+            privacy.
           </p>
         </div>
 
         {/* Enhanced Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
             <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/20 dark:to-emerald-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
               <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
@@ -113,7 +150,26 @@ const MarkdownConverter = () => {
               Export as HTML or PDF
             </p>
           </div>
+          <div className="text-center p-4 rounded-xl bg-gradient-to-br from-card to-card/50 border border-border/50 hover:shadow-md transition-all duration-300">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Settings2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            </div>
+            <h3 className="font-semibold text-foreground mb-1 text-sm">
+              Custom Styling
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Multiple themes and options
+            </p>
+          </div>
         </div>
+
+        {/* Conversion Settings (Collapsible) */}
+        {showSettings && (
+          <ConversionSettings
+            options={conversionOptions}
+            onOptionsChange={setConversionOptions}
+          />
+        )}
 
         {/* Main Content with Enhanced Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -124,18 +180,21 @@ const MarkdownConverter = () => {
             setHtmlContent={setHtmlContent}
             setFileName={setFileName}
             setIsDragging={setIsDragging}
+            conversionOptions={conversionOptions}
           />
 
           <MarkdownDownloadSection
             markdownContent={markdownContent}
             htmlContent={htmlContent}
             fileName={fileName}
+            conversionOptions={conversionOptions}
           />
         </div>
 
         <MarkdownPreviewSection
           markdownContent={markdownContent}
           htmlContent={htmlContent}
+          conversionOptions={conversionOptions}
         />
       </div>
 
@@ -143,15 +202,33 @@ const MarkdownConverter = () => {
       <footer className="border-t bg-muted/30 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
-            <p>© 2024 MarkdownPro. Privacy-first markdown conversion.</p>
+            <p>
+              © 2024 MarkdownPro. Privacy-first markdown conversion with
+              professional styling.
+            </p>
             <div className="flex items-center space-x-4 mt-2 sm:mt-0">
-              <Button variant="link" size="sm" className="text-xs p-0 h-auto">
+              <Button
+                variant="link"
+                size="sm"
+                className="text-xs p-0 h-auto"
+                onClick={() => navigate("/privacy")}
+              >
                 Privacy Policy
               </Button>
-              <Button variant="link" size="sm" className="text-xs p-0 h-auto">
+              <Button
+                variant="link"
+                size="sm"
+                className="text-xs p-0 h-auto"
+                onClick={() => navigate("/terms")}
+              >
                 Terms
               </Button>
-              <Button variant="link" size="sm" className="text-xs p-0 h-auto">
+              <Button
+                variant="link"
+                size="sm"
+                className="text-xs p-0 h-auto"
+                onClick={() => navigate("/contact")}
+              >
                 Support
               </Button>
             </div>

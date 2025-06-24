@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -6,13 +6,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileText, Upload, File, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  FileText,
+  Upload,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   validateMarkdownFile,
   readFileAsText,
   convertMarkdownToHtml,
+  convertMarkdownToStyledHtml,
 } from "@/utils/markdownUtils";
+import { ConversionOptions } from "./ConversionSettings";
 
 interface MarkdownUploadSectionProps {
   fileName: string;
@@ -21,6 +31,7 @@ interface MarkdownUploadSectionProps {
   setHtmlContent: (content: string) => void;
   setFileName: (name: string) => void;
   setIsDragging: (dragging: boolean) => void;
+  conversionOptions: ConversionOptions;
 }
 
 const MarkdownUploadSection = ({
@@ -30,53 +41,60 @@ const MarkdownUploadSection = ({
   setHtmlContent,
   setFileName,
   setIsDragging,
+  conversionOptions,
 }: MarkdownUploadSectionProps) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
   const { toast } = useToast();
 
-  const handleFileUpload = useCallback(
+  const processFile = useCallback(
     async (file: File) => {
       if (!validateMarkdownFile(file)) {
+        setUploadStatus("error");
         toast({
-          title: "Invalid File Type",
-          description: "Please upload a markdown (.md) file",
+          title: "Invalid file type",
+          description:
+            "Please upload a valid markdown file (.md or .markdown).",
           variant: "destructive",
         });
         return;
       }
 
+      setIsProcessing(true);
+      setUploadStatus("idle");
+
       try {
         const content = await readFileAsText(file);
+        const htmlContent = await convertMarkdownToHtml(
+          content,
+          conversionOptions
+        );
+
         setMarkdownContent(content);
-        const html = await convertMarkdownToHtml(content);
-        setHtmlContent(html);
-        setFileName(file.name.replace(".md", ""));
+        setHtmlContent(htmlContent);
+        setFileName(file.name.replace(/\.[^/.]+$/, "")); // Remove extension
+        setUploadStatus("success");
 
         toast({
-          title: "File Uploaded Successfully",
-          description: `${file.name} has been processed and is ready for conversion.`,
+          title: "File uploaded successfully!",
+          description: `${file.name} has been converted and is ready for preview.`,
         });
       } catch (error) {
+        console.error("Error processing file:", error);
+        setUploadStatus("error");
         toast({
-          title: "File Processing Error",
-          description: "Failed to process the markdown file",
+          title: "Error processing file",
+          description:
+            "There was an error converting your markdown file. Please try again.",
           variant: "destructive",
         });
+      } finally {
+        setIsProcessing(false);
       }
     },
-    [setMarkdownContent, setHtmlContent, setFileName, toast]
-  );
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-
-      const files = Array.from(e.dataTransfer.files);
-      if (files.length > 0) {
-        handleFileUpload(files[0]);
-      }
-    },
-    [handleFileUpload, setIsDragging]
+    [setMarkdownContent, setHtmlContent, setFileName, conversionOptions, toast]
   );
 
   const handleDragOver = useCallback(
@@ -95,108 +113,170 @@ const MarkdownUploadSection = ({
     [setIsDragging]
   );
 
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) {
+        processFile(files[0]);
+      }
+    },
+    [setIsDragging, processFile]
+  );
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length > 0) {
+        processFile(files[0]);
+      }
+    },
+    [processFile]
+  );
+
+  const getStatusIcon = () => {
+    if (uploadStatus === "success") {
+      return <CheckCircle2 className="h-8 w-8 text-emerald-500" />;
+    }
+    if (uploadStatus === "error") {
+      return <AlertCircle className="h-8 w-8 text-destructive" />;
+    }
+    return <Upload className="h-8 w-8 text-muted-foreground" />;
+  };
+
+  const getStatusMessage = () => {
+    if (uploadStatus === "success") {
+      return "File uploaded successfully!";
+    }
+    if (uploadStatus === "error") {
+      return "Error uploading file. Please try again.";
+    }
+    return "Upload your markdown file";
+  };
+
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+    <Card className="shadow-xl border-0 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <div className="p-2 bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/20 dark:to-emerald-800/20 rounded-lg">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg">
             <Upload className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
           </div>
-          Upload Markdown File
-        </CardTitle>
-        <CardDescription className="text-muted-foreground">
-          Drag and drop your .md file here or click to browse
-        </CardDescription>
+          <div>
+            <CardTitle className="text-xl">Upload Markdown</CardTitle>
+            <CardDescription>
+              Drag and drop your .md file or click to browse
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div
-          className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer group ${
+          className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
             isDragging
-              ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 scale-[1.02] shadow-lg"
-              : "border-border hover:border-emerald-400 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/10"
+              ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 scale-105"
+              : uploadStatus === "success"
+              ? "border-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/30"
+              : uploadStatus === "error"
+              ? "border-destructive/50 bg-destructive/5"
+              : "border-muted-foreground/25 hover:border-emerald-300 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20"
           }`}
-          onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          onClick={() => document.getElementById("file-input")?.click()}
+          onDrop={handleDrop}
         >
-          {/* Background decoration */}
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-emerald-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          <div className="relative z-10">
-            <div
-              className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center transition-all duration-300 ${
-                isDragging
-                  ? "scale-110 from-emerald-100 to-emerald-200 dark:from-emerald-900/20 dark:to-emerald-800/20"
-                  : "group-hover:scale-105"
-              }`}
-            >
-              {isDragging ? (
-                <Sparkles className="h-8 w-8 text-emerald-500 animate-pulse" />
-              ) : (
-                <FileText className="h-8 w-8 text-muted-foreground group-hover:text-emerald-500 transition-colors duration-300" />
-              )}
+          {isProcessing && (
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                <p className="text-sm text-muted-foreground">
+                  Processing your markdown...
+                </p>
+              </div>
             </div>
+          )}
 
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              {isDragging ? "Drop your file here" : "Choose a markdown file"}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Supports .md and .markdown files up to 10MB
-            </p>
-
-            {/* File type indicators */}
-            <div className="flex justify-center space-x-2">
-              <span className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 rounded-full">
-                .md
-              </span>
-              <span className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 rounded-full">
-                .markdown
-              </span>
-            </div>
-          </div>
-
-          <input
-            id="file-input"
-            type="file"
-            accept=".md,.markdown"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleFileUpload(file);
-            }}
-          />
-        </div>
-
-        {fileName && (
-          <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 border border-emerald-200 dark:border-emerald-800 rounded-lg animate-in slide-in-from-bottom-2 duration-300">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                  <File className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
+          <div className="space-y-4">
+            {getStatusIcon()}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                {getStatusMessage()}
+              </h3>
+              {fileName && uploadStatus === "success" && (
+                <div className="flex items-center justify-center space-x-2 mb-4">
+                  <FileText className="h-4 w-4 text-emerald-600" />
+                  <span className="text-sm font-medium text-emerald-600">
                     {fileName}.md
                   </span>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                    File uploaded successfully
-                  </p>
+                  <Badge
+                    variant="outline"
+                    className="text-xs border-emerald-200 text-emerald-600"
+                  >
+                    Ready
+                  </Badge>
                 </div>
-              </div>
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              )}
+              <p className="text-muted-foreground mb-6">
+                {uploadStatus === "idle"
+                  ? "Support for .md and .markdown files. All processing happens locally in your browser."
+                  : uploadStatus === "success"
+                  ? "Your file has been converted and is ready for preview and export."
+                  : "Please check your file format and try again."}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <input
+                type="file"
+                accept=".md,.markdown"
+                onChange={handleFileSelect}
+                className="hidden"
+                id="markdown-upload"
+                disabled={isProcessing}
+              />
+              <label htmlFor="markdown-upload">
+                <Button
+                  asChild
+                  size="lg"
+                  className={`w-full bg-gradient-to-r transition-all duration-200 ${
+                    uploadStatus === "success"
+                      ? "from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
+                      : "from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
+                  }`}
+                  disabled={isProcessing}
+                >
+                  <div className="flex items-center space-x-2 cursor-pointer">
+                    {uploadStatus === "success" ? (
+                      <>
+                        <Sparkles className="h-5 w-5" />
+                        <span>Upload Another File</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-5 w-5" />
+                        <span>Choose File</span>
+                      </>
+                    )}
+                  </div>
+                </Button>
+              </label>
+
+              {uploadStatus === "success" && (
+                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    <span>Converted</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Ready to Export</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
-
-        {/* Help text */}
-        {!fileName && (
-          <div className="mt-4 text-center">
-            <p className="text-xs text-muted-foreground">
-              Your files are processed locally and never leave your device
-            </p>
-          </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
